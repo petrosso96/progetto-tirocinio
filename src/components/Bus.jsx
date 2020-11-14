@@ -3,7 +3,7 @@ import axios from "axios";
 
 function Bus() {
 
-    const API = "http://bustime.mta.info/api/siri/vehicle-monitoring.json?key=12eaff53-dc07-4730-a2bb-bd5478ee8822&version=2&VehicleMonitoringDetailLevel=minimum";
+    const API = "https://bustime.mta.info/api/siri/vehicle-monitoring.json?key=12eaff53-dc07-4730-a2bb-bd5478ee8822&version=2&VehicleMonitoringDetailLevel=minimum";
     const [roba,setROba] = useState("");
 
     useEffect(() => {
