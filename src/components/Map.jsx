@@ -4,20 +4,17 @@ import Bus from './Bus';
 
 
 
-function Map() {
+function Map(props) {
     const position = [40.7127281,-74.0060152];
+    
     return (
-        <MapContainer center={[40.7127281, -74.0060152]} zoom={13} scrollWheelZoom={false}>
+        <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={position}>
-            <Popup>
-                <Bus/>
-
-            </Popup>
-        </Marker>
+        <Marker position={position}><Popup><Bus/></Popup></Marker>
+        
         
       </MapContainer>
     )
