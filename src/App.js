@@ -3,6 +3,7 @@ import Map from './components/Map.jsx'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { Sidemenu } from './components/SideMenu';
 
 
 
@@ -15,6 +16,8 @@ function App() {
   const retrieveAllRoutesCoveredAPI = " http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT.json?key="+API_KEY;
   const [routes,setRoutes] = useState();
   const [stopsFromRoutes, setStopFromRoutes] = useState([]);
+  
+  
 
 
 
@@ -28,14 +31,12 @@ function App() {
         setRoutes(response.data.data.list);
         console.log(response.data.data.list)
         
-        
-      
       });
 
     }
     else{ 
     
-      var singleRoute;
+      var singleRoute= routes[0];
       let routeWithStops = {
         idRoute:"",
         name:"",
@@ -55,23 +56,28 @@ function App() {
           routeWithStops.stopIds = response.data.data.entry.stopIds;
           routeWithStops.idRoute = response.data.data.entry.routeId;
 
-          setStopFromRoutes( oldArray => [...oldArray,routeWithStops] );
+          setStopFromRoutes( stopsFromRoutes => [...stopsFromRoutes,routeWithStops] );
+           
         
         })
+
+
+
         
       }
+
+      
 
     }
     
   },[routes,retrieveAllRoutesCoveredAPI]);
 
 
-
   if(routes !== undefined){
    
     return (
       <div>
-   
+      <Sidemenu routesAndStops={stopsFromRoutes}/>
       <Map />
       </div>
     );
