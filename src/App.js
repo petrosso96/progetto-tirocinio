@@ -3,7 +3,9 @@ import Map from './components/Map.jsx'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Sidemenu } from './components/SideMenu';
+import SideMenu from './components/SideMenu.jsx'
+import {StopsProvider} from './components/StopsContext'
+
 
 
 
@@ -11,88 +13,69 @@ import { Sidemenu } from './components/SideMenu';
 function App() {
 
   const API_KEY = "12eaff53-dc07-4730-a2bb-bd5478ee8822";
-  const numberOfRoutesToRetrieve = 4;
-  const retrieveAllStopsOfRouteAPI = "http://bustime.mta.info/api/where/stops-for-route/"
+  const numberOfRoutesToShow = 10;
   const retrieveAllRoutesCoveredAPI = " http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT.json?key="+API_KEY;
-  const [routes,setRoutes] = useState();
-  const [stopsFromRoutes, setStopFromRoutes] = useState([]);
-  const [idOfAllStops,setIdOfAllStops] = useState([]);
+  const [routes,setRoutes] = useState([]);
+
+
 
 
   useEffect( () =>{
 
-    if(routes === undefined){
+    getRoutesCoveredFromAgency();
+
   
-      axios.get(retrieveAllRoutesCoveredAPI)
-      .then( response => {
-
-        setRoutes(response.data.data.list);
-      
-      });
-
-    }
-    else{ 
-
-      setStopFromRoutes( getStopsFromRoute() );
-    }
-    
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[routes, retrieveAllRoutesCoveredAPI]);
+  },[]);
+
+  const getRoutesCoveredFromAgency = () => {
 
 
-  const getStopsFromRoute = () =>{
+    axios.get(retrieveAllRoutesCoveredAPI)
+    .then( response => {
 
-    
-    let routesToReturn = [];
+      for(var i=0; i< response.data.data.list.length;++i){
 
-    for(var i=0;i<numberOfRoutesToRetrieve;i++){
+        let singleRoute = {
 
-      let newRouteWithStops = { // important to declare inside the loop
-        idRoute:"",
-        name:"",
-        stopIds:"",
-        polylines:"",
-  
+          id:"",
+          name:"",
+          description:"",
+        }
+
+        singleRoute.id =  response.data.data.list[i].id;
+        singleRoute.name = response.data.data.list[i].longName;
+        singleRoute.description = response.data.data.list[i].description;
+
+
+        setRoutes( routes => [...routes,singleRoute]  );
+       
+
       }
 
-     
-      newRouteWithStops.name = routes[i].longName;
+   
+    
+    });
 
-      axios.get(retrieveAllStopsOfRouteAPI+routes[i].id+".json?key="+API_KEY+"&includePolylines=true&version=2")
-      .then(response => {        
-        
-        newRouteWithStops.polylines = response.data.data.entry.polylines;
-        newRouteWithStops.idRoute = response.data.data.entry.routeId;
-        newRouteWithStops.stopIds = response.data.data.entry.stopIds;
-        
-        
-        routesToReturn.push(newRouteWithStops) ;
-        setIdOfAllStops( idOfAllStops => [...idOfAllStops,newRouteWithStops.stopIds]);
-
-      })
-
-    }
-    return routesToReturn;
   }
 
 
 
 
 
-  
 
-
-
-
-  if(routes !== undefined && stopsFromRoutes !== undefined && idOfAllStops !== undefined){
+  if(routes.length >= numberOfRoutesToShow  ){
     
    
     return (
-      <div>
-      <Sidemenu routesAndStops={stopsFromRoutes}/>
+      <StopsProvider>
+        <div>
 
-      <Map stopsMatrix={idOfAllStops} apiKey={API_KEY} />
-      </div>
+          <Map  apiKey={API_KEY} />
+          <SideMenu apiKey={API_KEY} routes={routes} numberOfRoutes={numberOfRoutesToShow}/>
+  
+        </div>
+      </StopsProvider>
     );
 
     

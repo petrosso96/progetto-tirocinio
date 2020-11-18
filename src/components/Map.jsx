@@ -1,73 +1,85 @@
-import React,{ useState, useEffect } from 'react'
+import React,{ useState, useEffect,useContext } from 'react'
 import {MapContainer, TileLayer} from 'react-leaflet';
 import axios from 'axios';
-import Stop from './StopInfo.jsx'
-
+import {StopsContext} from './StopsContext'
+import Stop from './Stop'
 
 
 
 function Map(props) {
-    const position = [40.7127281,-74.0060152];
-    const StopMonitoringAPI = "http://bustime.mta.info/api/siri/stop-monitoring.json?key=";
+    const [position,setPosition] = useState( [40.7127281,-74.0060152] );
+    const [routeWithStopsId,setRouteWithStopsId] = useContext(StopsContext);
+    const [isReadyToRender,setIsReadyToRender] = useState(false);
     const retrieveStopPositionAPI = "http://bustime.mta.info/api/where/stop/";
-    const [stopsCoordinates,setStopsCoordinates] = useState([]);
     
 
-   
-    useEffect( () => {
+    useEffect(() => {
 
-      for (let i = 0; i < props.stopsMatrix.length; i++) {
+      setRouteWithStopsId(routeWithStopsId => [...routeWithStopsId,{xxx:"xxx"}]);
 
-        for (let j = 0; j < props.stopsMatrix[i].length; j++) {
+    },[routeWithStopsId]);
+
+    useEffect(() => {
+
+
+    },)
+
+    const getCoordinatesOfStops = (stopsData) => {
+
+      let coupleOfCoordinates = [];
+      console.log(stopsData)
+
+
+
+        //for(var i = 0;i < stopsData.stopIds.length;++i){console.log("dfg")
 
           let latAndLon = {
             latitude:"",
             longitude:"",
           }
-          
-          axios.get(retrieveStopPositionAPI+props.stopsMatrix[i][j]+".json?key="+props.apiKey+"&&version=2")
+
+          axios.get(retrieveStopPositionAPI+stopsData+".json?key="+props.apiKey+"&&version=2")
           .then(response => {
             
             latAndLon.latitude = response.data.data.entry.lat;
             latAndLon.longitude = response.data.data.entry.lon;
 
+            
+          });
 
-            setStopsCoordinates( stopsCoordinates => [...stopsCoordinates,latAndLon]);
-          })
 
-        }
         
-      }
+      // }
+
+      return latAndLon;
+
+    }
 
 
-      
-
-    },[props.stopsMatrix] );
-
-
-    
     return (
-        <MapContainer center={position} zoom={13} scrollWheelZoom={true}>
+        <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {stopsCoordinates.map( (stop,i) => {
+        {routeWithStopsId.stopIds.map( (stop,i) => {
+
+          let coordinates = getCoordinatesOfStops(stop);
 
           let stopPosition = [];
-          stopPosition.push(stop.latitude);
-          stopPosition.push(stop.longitude);
-
+          stopPosition.push(coordinates.latitude);
+          stopPosition.push(coordinates.longitude);
 
           return( 
-          <Stop key={i}  position={stopPosition}/>
+          <Stop key={i} position={stopPosition}/>
           );
 
-        } )}
+        })}
         
         
       </MapContainer>
     )
+      
 }
 
 export default Map
