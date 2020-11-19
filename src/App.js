@@ -16,6 +16,7 @@ function App() {
   const numberOfRoutesToShow = 10;
   const retrieveAllRoutesCoveredAPI = " http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT.json?key="+API_KEY;
   const [routes,setRoutes] = useState([]);
+  const [loadingListOfRoutes,setLoadingListOfRoutes] = useState(true);
 
 
 
@@ -27,6 +28,15 @@ function App() {
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
+
+  useEffect(() => {
+
+    if(routes.length === numberOfRoutesToShow){
+      setLoadingListOfRoutes(false)
+    }
+    
+
+  },[routes])
 
   const getRoutesCoveredFromAgency = () => {
 
@@ -72,7 +82,7 @@ function App() {
         <div>
 
           <Map  apiKey={API_KEY} />
-          <SideMenu apiKey={API_KEY} routes={routes} numberOfRoutes={numberOfRoutesToShow}/>
+          {!loadingListOfRoutes&&(<SideMenu apiKey={API_KEY} routes={routes} numberOfRoutes={numberOfRoutesToShow}/>)}
   
         </div>
       </StopsProvider>

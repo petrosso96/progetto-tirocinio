@@ -6,10 +6,7 @@ export const StopsContext = createContext();
 
 export const StopsProvider = (props) => {
 
-    const [routeWithStopsId,setRouteWithStopsId] = useState([{
-
-        stopIds:[]
-    }]);
+    const [routeWithStopsId,setRouteWithStopsId] = useState();
 
 
     return(
