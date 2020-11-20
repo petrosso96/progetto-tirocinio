@@ -76,16 +76,19 @@ function Map(props) {
 
       for(var i = 0;i < stopIds.length;++i){
 
-        let latAndLon = ["",""]
+        let latLonAndId = ["","",""]
 
         axios.get(retrieveStopPositionAPI+stopIds[i]+".json?key="+props.apiKey+"&&version=2")
         .then(response => {
+          
 
   
-          latAndLon[0] = parseFloat( response.data.data.entry.lat);
-          latAndLon[1] = parseFloat(response.data.data.entry.lon);
+          latLonAndId[0] = parseFloat(response.data.data.entry.lat);
+          latLonAndId[1] = parseFloat(response.data.data.entry.lon);
+          latLonAndId[2] = response.data.data.entry.id ;
 
-          setStopsCoordinatesToRender(stopsCoordinatesToRender => [...stopsCoordinatesToRender,latAndLon]);
+
+          setStopsCoordinatesToRender(stopsCoordinatesToRender => [...stopsCoordinatesToRender,latLonAndId]);
         });
       }
 
@@ -114,7 +117,6 @@ function Map(props) {
 
           setLoadingStopsToRender(false);
           getCoordinatesOfStops(routeWithStopsId.stopIds);
-          console.log(routeWithStopsId.polylines)
           getCoordinatesOfPolylines(routeWithStopsId.polylines);
 
         },600);
@@ -135,11 +137,7 @@ function Map(props) {
           stopPosition.push(stop[1]);
 
           return( 
-            <>
-            <Stop key={i} position={stopPosition}/>
-            
-            </>
-             
+            <Stop key={i} position={stopPosition} id={stop[2]} API_KEY={props.apiKey} routeId={routeWithStopsId.idRoute}/>
           );
 
         }))}

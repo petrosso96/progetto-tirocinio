@@ -37,6 +37,7 @@ export  default function Sidemenu(props) {
 
         
         let StopIdsForRoute = { 
+            routeName:"",
             idRoute:"",
             stopIds:[],
             polylines:[],     
@@ -44,10 +45,12 @@ export  default function Sidemenu(props) {
 
         axios.get(retrieveAllStopsOfRouteAPI+routeId+".json?key="+props.apiKey+"&includePolylines=true&version=2")
           .then(response => {        
-            
+           
             StopIdsForRoute.polylines = response.data.data.entry.polylines;
             StopIdsForRoute.idRoute = response.data.data.entry.routeId;
             StopIdsForRoute.stopIds = response.data.data.entry.stopIds;
+
+
             
         });
 
