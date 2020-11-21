@@ -7,10 +7,11 @@ import axios from 'axios';
 import {StopsContext} from './StopsContext'
 
 
+
 const useStyles = makeStyles((theme) => ({
     root: {
       width: '100%',
-      maxWidth: 360,
+      maxWidth: 500,
       backgroundColor: theme.palette.background.paper,
     },
 }));
@@ -112,7 +113,7 @@ export  default function Sidemenu(props) {
               </List>
           </div>
     );
-    
+
    
     
 }

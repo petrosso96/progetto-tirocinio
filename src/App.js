@@ -13,7 +13,7 @@ import {StopsProvider} from './components/StopsContext'
 function App() {
 
   const API_KEY = "12eaff53-dc07-4730-a2bb-bd5478ee8822";
-  const numberOfRoutesToShow = 10;
+  const numberOfRoutesToShow = 13;
   const retrieveAllRoutesCoveredAPI = " http://bustime.mta.info/api/where/routes-for-agency/MTA%20NYCT.json?key="+API_KEY;
   const [routes,setRoutes] = useState([]);
   const [loadingListOfRoutes,setLoadingListOfRoutes] = useState(true);

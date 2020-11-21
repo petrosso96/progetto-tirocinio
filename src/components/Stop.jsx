@@ -8,9 +8,10 @@ import useInterval from 'react-useinterval';
 
 
 
+
 function StopInfo(props) {
 
-    const REFRESH_INTERVAL = 10000;
+    const REFRESH_INTERVAL = 10000; //expressed in Milliseconds
     const StopMonitoringAPI = "http://bustime.mta.info/api/siri/stop-monitoring.json?key=";
     const ScheduleInformationAPI = "http://bustime.mta.info/api/where/schedule-for-stop/"+props.id+".json?key="+props.API_KEY;
     const CurrentTimeAPI = "http://bustime.mta.info/api/where/current-time.json?key="+props.API_KEY;
@@ -66,40 +67,36 @@ function StopInfo(props) {
 
     };
 
-    const setWaitTime = (table, expectedArrivalTime) => {
+    const getWaitTime = (currentTimeInMilliseconds, expectedArrivalTimeInMilliseconds) => {
 
-        axios.get(CurrentTimeAPI)
-        .then(response => {
+       let waitTimeinMilliseconds = expectedArrivalTimeInMilliseconds - currentTimeInMilliseconds;
+       let waitTime;
 
-           let expectedArrivalTimeInMilliseconds = Date.parse(expectedArrivalTime);
-           let currentTimeInMilliseconds = response.data.currentTime;
-           let waitTimeinMilliseconds = expectedArrivalTimeInMilliseconds - currentTimeInMilliseconds;
            
+        if( Math.sign(waitTimeinMilliseconds) === 1){
 
-           if( Math.sign(waitTimeinMilliseconds) === 1){
-
-              let waitTimeInSeconds = waitTimeinMilliseconds/1000;
+          let waitTimeInSeconds = waitTimeinMilliseconds/1000;
            
-              if(waitTimeInSeconds >= 60){
+          if(waitTimeInSeconds >= 60){
 
-                let waitTimeInMinutes = waitTimeInSeconds/60;
+            let waitTimeInMinutes = waitTimeInSeconds/60;
 
-                table.wait = Math.round(waitTimeInMinutes)+" min.";
+            waitTime = Math.round(waitTimeInMinutes)+" min.";
             
-              }else{
+          }else{
 
-                table.wait = "in arrivo";
+            waitTime = "in arrivo";
             
-              }
-            }
-            else{
-                table.wait ="No info available"
-            }
+          }
+        }
+        else{
+            waitTime ="No info available"
+        }
 
-            setInfoTable(infoTable => [...infoTable,table]);
+        return waitTime;
 
-        })
 
+        
     }
 
     const cleanTable = () => {
@@ -109,53 +106,88 @@ function StopInfo(props) {
 
     }
 
+
+    const getDelay = (currentTimeInMilliseconds,exptectedArrivalTimeInMilliseconds) => {
+            
+        for (let index = 0; index < scheduleStopTimes.length; index++) {
+            const scheduleStopTimeInMilliseconds = scheduleStopTimes[index];
+
+            if(currentTimeInMilliseconds < scheduleStopTimeInMilliseconds){
+
+                if(exptectedArrivalTimeInMilliseconds <= scheduleStopTimeInMilliseconds){
+                    
+                    return 0;
+                }
+                else{
+                    return scheduleStopTimeInMilliseconds - exptectedArrivalTimeInMilliseconds;
+                }
+            
+            }
+                
+        }
+        return null;
+
+    }
+
     const getRealTimeInformation = () => {
 
-        axios.get(StopMonitoringAPI+props.API_KEY+"&&MonitoringRef="+props.id+"&&version=2")
+        axios.get(CurrentTimeAPI)
         .then(response => {
+            
+            const currentTimeInMilliseconds = response.data.currentTime;
 
-            let vehiclesServingStop = response.data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+            axios.get(StopMonitoringAPI+props.API_KEY+"&&MonitoringRef="+props.id+"&&version=2")
+            .then(response => {
+               
 
-            if(vehiclesServingStop.length > 0){
+               let vehiclesServingStop = response.data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+
+                if(vehiclesServingStop.length > 0){
                 
 
-                for (let index = 0; index < vehiclesServingStop.length; index++) {
-                    const vehicle = vehiclesServingStop[index];
+                   for (let index = 0; index < vehiclesServingStop.length; index++) {
+                       const vehicle = vehiclesServingStop[index];
+
+                       let table = {
+                           destination:"",
+                           line:"",
+                           wait:"",
+                           delay:"",
+                        }     
+  
+                        table.destination = vehicle.MonitoredVehicleJourney.DestinationName[0];
+                        table.line = vehicle.MonitoredVehicleJourney.PublishedLineName[0];
+
+                        let MonitoredCall = vehicle.MonitoredVehicleJourney.MonitoredCall;
+                        if(MonitoredCall.ExpectedArrivalTime !== undefined){
+
+                          let exptecteArrivalTimeInMilliseconds = Date.parse(vehicle.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime);
+
+                          table.delay = getDelay(currentTimeInMilliseconds,exptecteArrivalTimeInMilliseconds);
+                          table.wait = getWaitTime(currentTimeInMilliseconds,exptecteArrivalTimeInMilliseconds);
+
+                          setInfoTable(infoTable => [...infoTable,table]); 
+                          
+
+                        }
+                        else{
+                           //in this case there are not ExtimatedTimeArrival
+                        }
+
+                    }
 
                     
-                    let table = {
-                        destination:"",
-                        line:"",
-                        wait:""
-                    }     
-
-                    //console.log(vehiclesServingStop[0].MonitoredVehicleJourney)
-                    table.destination = vehicle.MonitoredVehicleJourney.DestinationName[0];
-                    table.line = vehicle.MonitoredVehicleJourney.PublishedLineName[0];
-
-                    let MonitoredCall = vehicle.MonitoredVehicleJourney.MonitoredCall;
-                    if(MonitoredCall.ExpectedArrivalTime !== undefined){
-
-        
-                    //console.log(vehiclesServingStop[0].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime)
-                    setWaitTime(table,vehicle.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime);
-
-
-                    }
-                    else{
-                        //in this case there are not ExtimatedTimeArrival
-                    }
+                    
                 }
-                    
-            }
-            else{
-                //in this case there are not information about current stop
+                else{
+                   //in this case there are not information about current stop
 
-            }
+                }
+            });
 
             
 
-        })
+        });
 
 
     };
