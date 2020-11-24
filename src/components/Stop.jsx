@@ -11,13 +11,14 @@ import useInterval from 'react-useinterval';
 
 function StopInfo(props) {
 
-    const REFRESH_INTERVAL = 10000; //expressed in Milliseconds
+    const REFRESH_INTERVAL = 30000; //expressed in Milliseconds
     const StopMonitoringAPI = "http://bustime.mta.info/api/siri/stop-monitoring.json?key=";
     const ScheduleInformationAPI = "http://bustime.mta.info/api/where/schedule-for-stop/"+props.id+".json?key="+props.API_KEY;
     const CurrentTimeAPI = "http://bustime.mta.info/api/where/current-time.json?key="+props.API_KEY;
     const [infoTable,setInfoTable] = useState([]);
     const [scheduleStopTimes,setScheduleStopTimes] = useState();
     const [keepUpdatingStop,setKeepUpdatingStop] = useState(false);
+   
     
     useEffect(() => {
 
@@ -107,25 +108,31 @@ function StopInfo(props) {
     }
 
 
-    const getDelay = (currentTimeInMilliseconds,exptectedArrivalTimeInMilliseconds) => {
+    const getDelay = (currentTimeInMilliseconds,exptectedArrivalTimeInMilliseconds) => {// lavorare in secondi 
             
-        for (let index = 0; index < scheduleStopTimes.length; index++) {
-            const scheduleStopTimeInMilliseconds = scheduleStopTimes[index];
+        if(scheduleStopTimes !== undefined){  
+            for (let index = 0; index < scheduleStopTimes.length; index++) {
+                const scheduleStopTimeInMilliseconds = scheduleStopTimes[index];
 
-            if(currentTimeInMilliseconds < scheduleStopTimeInMilliseconds){
+                if(currentTimeInMilliseconds < scheduleStopTimeInMilliseconds.arrivalTime){
 
-                if(exptectedArrivalTimeInMilliseconds <= scheduleStopTimeInMilliseconds){
+                    if(exptectedArrivalTimeInMilliseconds <= scheduleStopTimeInMilliseconds.arrivalTime){
                     
-                    return 0;
-                }
-                else{
-                    return scheduleStopTimeInMilliseconds - exptectedArrivalTimeInMilliseconds;
-                }
+                        return 0;
+                    }
+                    else{
+                        return scheduleStopTimeInMilliseconds.arrivalTime - exptectedArrivalTimeInMilliseconds;
+                    }
             
-            }
+                }
                 
+            }
         }
-        return null;
+        else{
+            return "no info available";
+
+        }
+       
 
     }
 
@@ -140,19 +147,22 @@ function StopInfo(props) {
             .then(response => {
                
 
-               let vehiclesServingStop = response.data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+               let MonitoredStopVisit = response.data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+               
 
-                if(vehiclesServingStop.length > 0){
+                if(MonitoredStopVisit.length > 0){
                 
+                  
 
-                   for (let index = 0; index < vehiclesServingStop.length; index++) {
-                       const vehicle = vehiclesServingStop[index];
+                   for (let index = 0; index < MonitoredStopVisit.length; index++) {
+                       const vehicle = MonitoredStopVisit[index];
 
                        let table = {
                            destination:"",
                            line:"",
                            wait:"",
                            delay:"",
+                           
                         }     
   
                         table.destination = vehicle.MonitoredVehicleJourney.DestinationName[0];
@@ -165,6 +175,7 @@ function StopInfo(props) {
 
                           table.delay = getDelay(currentTimeInMilliseconds,exptecteArrivalTimeInMilliseconds);
                           table.wait = getWaitTime(currentTimeInMilliseconds,exptecteArrivalTimeInMilliseconds);
+                        
 
                           setInfoTable(infoTable => [...infoTable,table]); 
                           
