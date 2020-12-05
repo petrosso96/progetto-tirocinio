@@ -22,8 +22,10 @@ export  default function Sidemenu(props) {
     const classes = useStyles();
     const [routes,setRoutes] = useState([]);
     // eslint-disable-next-line no-unused-vars
-    const [routeWithStopsId,setRouteWithStopsId] = useContext(StopsContext);
-    const retrieveAllStopsOfRouteAPI = "http://bustime.mta.info/api/where/stops-for-route/"
+    const [routeWithStopsId,setRouteWithStopsId,linePredictions,] = useContext(StopsContext);
+    const retrieveAllStopsOfRouteAPI = "http://bustime.mta.info/api/where/stops-for-route/";
+    const [showLinePredictions,setShowLinePredictions] = useState(false);
+
 
     
 
@@ -33,6 +35,21 @@ export  default function Sidemenu(props) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[]);
+
+    useEffect(() => {
+
+        if(linePredictions.length === 0){
+
+            setShowLinePredictions(false);
+
+
+        }else{
+
+            setShowLinePredictions(true);
+
+
+        }
+    },[linePredictions]);
 
     const getStopsFromRoute = (routeId) => {
 
@@ -92,13 +109,13 @@ export  default function Sidemenu(props) {
 
 
 
-
+    
     return ( 
         
           <div className={classes.root}>
               <List component="nav" aria-label="secondary mailbox folders">
 
-                { routes.map( (route,i) => {
+                { !showLinePredictions&&(routes.map( (route,i) => {
 
                         return (  
                             <ListItem   key={i} id={route.id}  button={true}> 
@@ -107,8 +124,19 @@ export  default function Sidemenu(props) {
                         );
                     
                         }   
-                    )
+                    ))
                 }
+
+                {showLinePredictions&&(linePredictions.map( (prediction,i) => (
+
+                    <ListItem key={i}> 
+                        <ListItemText primary={prediction.wait} secondary={prediction.destination+" ("+prediction.line+")"}></ListItemText>
+                    </ListItem>
+                    )
+
+                  )
+
+                )}
              
               </List>
           </div>

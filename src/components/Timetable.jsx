@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useState,useContext} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from '@material-ui/core/Table';
@@ -8,7 +8,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import './Timetable.css'
+import './Timetable.css';
+import {StopsContext} from './StopsContext';
 
 const useStyles = makeStyles({
   table: {
@@ -36,6 +37,7 @@ export default function Timetable(props) {
   const slightDelay = 5; //min.
   const [linees,setLinees] = useState([]);
   const [renderTable,setRenderTable] = useState(false);
+  const [,,,setLinePredictions] = useContext(StopsContext);
   
   const organizePredictionForLinees = () => {
 
@@ -124,6 +126,16 @@ export default function Timetable(props) {
     return delayType;
 
   }
+
+  const showAllLinePredictions = (predictions) => {
+
+    if(predictions.length > 1){
+
+      console.log(predictions)
+      setLinePredictions(predictions);
+    }
+
+  }
   
 
   if(renderTable){
@@ -145,7 +157,7 @@ export default function Timetable(props) {
                 let color = getColorByDelay( row.predictions[0].delay);
           
                 return(
-                  <TableRow key={i}>
+                  <TableRow key={i} onClick={() => {showAllLinePredictions(row.predictions);}}>
                   <TableCell component="th" scope="row"> {row.predictions[0].line}</TableCell>
                   <TableCell align="right">{row.predictions[0].destination}</TableCell>
                   <TableCell align="right">{<div className={color}>{row.predictions[0].wait}</div>}</TableCell>

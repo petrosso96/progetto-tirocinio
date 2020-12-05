@@ -1,8 +1,10 @@
-import React,{useEffect, useState} from 'react';
+import React,{useEffect, useState, useContext} from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import axios from 'axios';
 import Timetable from './Timetable';
 import useInterval from 'react-useinterval';
+import {StopsContext} from './StopsContext';
+
 
 
 
@@ -18,6 +20,7 @@ function StopInfo(props) {
     const [infoTable,setInfoTable] = useState([]);
     const [scheduleStopTimes,setScheduleStopTimes] = useState();
     const [keepUpdatingStop,setKeepUpdatingStop] = useState(false);
+    const [,,,setLinePredictions] = useContext(StopsContext);
    
     
     useEffect(() => {
@@ -104,6 +107,8 @@ function StopInfo(props) {
 
         setKeepUpdatingStop(false);
         setInfoTable([]);
+        setLinePredictions([]);
+
 
     }
 

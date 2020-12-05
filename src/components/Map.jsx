@@ -8,8 +8,8 @@ import { Polyline } from 'react-leaflet';
 
 
 function Map(props) {
-    const [position,setPosition] = useState([40.7127281,-74.0060152]);
-    const [routeWithStopsId,setRouteWithStopsId] = useContext(StopsContext);
+    const [position,] = useState([40.7127281,-74.0060152]);
+    const [routeWithStopsId,] = useContext(StopsContext);
     const [loadingStopsToRender,setLoadingStopsToRender] = useState(true);
     const [stopsCoordinatesToRender,setStopsCoordinatesToRender] = useState([]);
     const [polylinesCoordinates,setPolylinesCoordinates] = useState([]);
