@@ -94,7 +94,7 @@ export default function Timetable(props) {
 
     organizePredictionForLinees();
 
-  },[ props.info, props.previsionsNumber]);
+  },[props.info, props.previsionsNumber]);
   
   
 
@@ -158,15 +158,15 @@ export default function Timetable(props) {
           
                 return(
                   <TableRow key={i} onClick={() => {showAllLinePredictions(row.predictions);}}>
-                  <TableCell component="th" scope="row"> {row.predictions[0].line}</TableCell>
-                  <TableCell align="right">{row.predictions[0].destination}</TableCell>
-                  <TableCell align="right">{<div className={color}>{row.predictions[0].wait}</div>}</TableCell>
+                    <TableCell  key={i*2} component="th" scope="row"> {row.predictions[0].line}</TableCell>
+                    <TableCell key={i*3} align="right">{row.predictions[0].destination}</TableCell>
+                    <TableCell key={i*4} align="right">{<div className={color}>{row.predictions[0].wait}</div>}</TableCell>
                   </TableRow>
                 );
 
               }
               else{
-                return(<> </>);
+                return(<></>);
               }
             })}         
           </TableBody>

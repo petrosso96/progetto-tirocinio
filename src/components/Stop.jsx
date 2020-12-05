@@ -6,11 +6,6 @@ import useInterval from 'react-useinterval';
 import {StopsContext} from './StopsContext';
 
 
-
-
-
-
-
 function StopInfo(props) {
 
     const REFRESH_INTERVAL = 30000; //expressed in Milliseconds
