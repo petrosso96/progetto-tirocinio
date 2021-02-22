@@ -1,3 +1,3 @@
 # progetto-tirocinio
 
-Back-end per la gestione di un sistema di strutture ricettive e non. 
+Web app per la consultazione di orari di arrivo, aggiornati in tempo reale, di una flotta di autobus su diverse fermate a scelta dell'utente
